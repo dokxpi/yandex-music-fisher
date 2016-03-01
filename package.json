@@ -10,7 +10,7 @@
     "increment-version-minor": "node utils/increment_version.js --version=minor",
     "increment-version-patch": "node utils/increment_version.js --version=patch",
     "make-dist": "npm run build && node utils/make_dist.js",
-    "release": "node utils/release.js",
+    "release": "node utils/create_github_release.js",
     "show-download-stats": "node utils/show_download_stats.js"
   },
   "repository": {
@@ -24,12 +24,12 @@
   },
   "homepage": "https://github.com/egoroof/yandex-music-fisher#readme",
   "devDependencies": {
-    "babel-core": "6.5.2",
+    "babel-core": "6.6.0",
     "babel-eslint": "5.0.0",
     "babel-loader": "6.2.4",
     "babel-plugin-syntax-async-functions": "6.5.0",
     "babel-plugin-transform-async-to-generator": "6.5.0",
-    "babel-plugin-transform-es2015-parameters": "6.5.0",
+    "babel-plugin-transform-es2015-parameters": "6.6.0",
     "babel-plugin-transform-strict-mode": "6.5.2",
     "blueimp-md5": "2.3.0",
     "browser-id3-writer": "2.0.2",

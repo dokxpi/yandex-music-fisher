@@ -291,7 +291,7 @@ function generateDownloadArtist(artist) {
         $('downloadTop10Tracks').classList.remove('hidden');
         $('downloadTop10Tracks').addEventListener('click', () => {
             artist.tracks.forEach((track) => {
-                backgroundPage.fisher.downloader.downloadTrack(track.id, track.albums[0]);
+                backgroundPage.fisher.downloader.downloadTrack(track.id, track.albums[0].id);
             });
             $('downloadBtn').click();
         });
@@ -549,7 +549,7 @@ function generateDownloadPlaylist(playlist) {
         if ('error' in track) {
             return;
         }
-        size += track.fileSize;
+        size += track.fileSize || backgroundPage.fisher.downloader.defaultBitrate * (track.durationMs / 1000);
         duration += track.durationMs;
     });
     const sizeStr = backgroundPage.fisher.utils.bytesToStr(size);
@@ -579,6 +579,7 @@ chrome.runtime.onMessage.addListener(async(request) => {
     if (!request || request.action !== 'getCurrentTrackUrl' || !('link' in request)) {
         hidePreloader();
         $('downloadBtn').click();
+        $('addBtn').disabled = true;
         return;
     }
     const url = backgroundPage.fisher.yandex.baseUrl + request.link;
@@ -587,6 +588,7 @@ chrome.runtime.onMessage.addListener(async(request) => {
 
     downloadBtn.setAttribute('data-type', 'track');
     downloadBtn.setAttribute('data-trackId', page.trackId);
+    downloadBtn.setAttribute('data-albumId', page.albumId);
     if (backgroundPage.fisher.storage.current.singleClickDownload) {
         hidePreloader();
         downloadBtn.click();

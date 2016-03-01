@@ -18,7 +18,8 @@ const downloader = {
     PATH_LIMIT: 50,
     downloads: new Map(),
     downloadsLastIndex: 0,
-    activeThreadCount: 0
+    activeThreadCount: 0,
+    defaultBitrate: 192 * 1000 / 8 // кбиты -> байты
 };
 
 downloader.runAllThreads = () => {
@@ -79,8 +80,21 @@ downloader.download = async() => {
         }
         const writer = new ID3Writer(buffer);
         const artists = fisher.utils.parseArtists(entity.track.artists);
-        const albumArtist = fisher.utils.parseArtists(trackAlbum.artists).artists.join(', ');
-        const genre = trackAlbum.genre;
+
+        if (trackAlbum) {
+            if ('artists' in trackAlbum && Array.isArray(trackAlbum.artists)) {
+                writer.setFrame('TPE2', fisher.utils.parseArtists(trackAlbum.artists).artists.join(', '));
+            }
+            if ('genre' in trackAlbum && typeof trackAlbum.genre === 'string') {
+                writer.setFrame('TCON', [trackAlbum.genre[0].toUpperCase() + trackAlbum.genre.substr(1)]);
+            }
+            if ('title' in trackAlbum) {
+                writer.setFrame('TALB', trackAlbum.title);
+            }
+            if ('year' in trackAlbum) {
+                writer.setFrame('TYER', trackAlbum.year);
+            }
+        }
 
         if ('title' in entity) {
             writer.setFrame('TIT2', entity.title);
@@ -88,14 +102,8 @@ downloader.download = async() => {
         if (artists.artists.length) {
             writer.setFrame('TPE1', artists.artists);
         }
-        if ('title' in trackAlbum) {
-            writer.setFrame('TALB', trackAlbum.title);
-        }
         if ('durationMs' in entity.track) {
             writer.setFrame('TLEN', entity.track.durationMs);
-        }
-        if ('year' in trackAlbum) {
-            writer.setFrame('TYER', trackAlbum.year);
         }
         if (artists.composers.length) {
             writer.setFrame('TCOM', artists.composers);
@@ -105,12 +113,6 @@ downloader.download = async() => {
         }
         if ('albumPosition' in entity && entity.albumCount > 1) {
             writer.setFrame('TPOS', entity.albumPosition);
-        }
-        if (albumArtist) {
-            writer.setFrame('TPE2', albumArtist);
-        }
-        if (genre) {
-            writer.setFrame('TCON', [genre[0].toUpperCase() + genre.substr(1)]);
         }
         if ('lyrics' in entity && typeof entity.lyrics === 'string') {
             writer.setFrame('USLT', entity.lyrics);
@@ -134,8 +136,10 @@ downloader.download = async() => {
     }
 
     if (entity.type === downloader.TYPE.TRACK) {
-        trackAlbum = entity.track.albums[0];
-        if ('coverUri' in trackAlbum) {
+        if (entity.track.albums.length) { // у треков из яндекс.диска может не быть альбома
+            trackAlbum = entity.track.albums[0];
+        }
+        if (trackAlbum && 'coverUri' in trackAlbum) {
             // пример альбома без обложки: https://music.yandex.ru/album/2236232/track/23652415
             const coverUrl = `https://${trackAlbum.coverUri.replace('%%', fisher.storage.current.albumCoverSizeId3)}`;
 
@@ -358,7 +362,7 @@ downloader.downloadPlaylist = (username, playlistId) => {
                 console.error(`Track error: ${track.error}`, track);
                 return;
             }
-            playlistEntity.size += track.fileSize;
+            playlistEntity.size += track.fileSize || fisher.downloader.defaultBitrate * (track.durationMs / 1000);
             playlistEntity.duration += track.durationMs;
             const trackEntity = {
                 type: downloader.TYPE.TRACK,

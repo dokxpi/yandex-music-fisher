@@ -1,6 +1,5 @@
 'use strict';
 
-const exec = require('child_process').exec;
 const https = require('https');
 const fs = require('fs');
 const url = require('url');
@@ -59,17 +58,6 @@ function uploadGithubAsset(uploadUrl) {
 
     return post(uploadUrl, 'application/zip', buffer);
 }
-
-console.log('Commiting...');
-exec(`git add . && git commit -m "${manifest.version}"`, (error, stdout, stderr) => {
-    if (error !== null) {
-        console.error(`exec error: ${error}`);
-    }
-    if (stderr) {
-        console.error(stderr);
-    }
-    console.log(stdout);
-});
 
 createGithubRelease()
     .then((response) => {
