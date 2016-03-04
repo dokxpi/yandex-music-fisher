@@ -32,7 +32,7 @@ function post(postUrl, type, data) {
             }
             res.setEncoding('utf8');
             res.on('data', (chunk) => data += chunk);
-            res.on('end', () => resolve(JSON.parse(data)))
+            res.on('end', () => resolve(JSON.parse(data)));
         });
 
         request.write(data);
@@ -45,7 +45,7 @@ function createGithubRelease() {
     const releasesUrl = 'https://api.github.com/repos/egoroof/yandex-music-fisher/releases';
     const data = JSON.stringify({
         tag_name: `v${manifest.version}`,
-        target_commitish: "master",
+        target_commitish: 'master',
         name: manifest.version,
         draft: true
     });
@@ -67,7 +67,7 @@ createGithubRelease()
         console.log(`GitHub release draft '${manifest.version}' was created`);
         return uploadGithubAsset(uploadUrl);
     })
-    .then((response) => {
+    .then(() => {
         console.log(`Asset ${assetName} was added to GitHub release draft`);
     })
     .catch((e) => console.error(e));

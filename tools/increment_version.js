@@ -5,8 +5,7 @@ const os = require('os');
 const path = require('path');
 const MANIFEST_PATH = path.join(path.dirname(__dirname), 'src', 'manifest.json');
 const argvVersion = process.argv[2].split('=')[1];
-
-let manifest = require('../src/manifest.json');
+const manifest = require('../src/manifest.json');
 
 const oldVersion = manifest.version;
 const splittedVersion = oldVersion.split('.');

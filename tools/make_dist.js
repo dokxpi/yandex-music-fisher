@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const DRAFT_PATH = path.join(__dirname, 'readme_draft.txt');
-const README_PATH = path.join(path.dirname(__dirname), 'readme.md');
+const README_PATH = path.join(path.dirname(__dirname), 'README.md');
 const manifest = require('../src/manifest.json');
 const JSZip = require('jszip');
 
@@ -15,7 +15,7 @@ function walkSync(dir, filelist) {
         const relativePath = dir + file;
 
         if (fs.statSync(relativePath).isDirectory()) {
-            filelist = walkSync(relativePath + '/', filelist);
+            filelist = walkSync(`${relativePath}/`, filelist);
         } else {
             filelist.push({
                 path: relativePath.replace('src/', ''),
@@ -30,7 +30,7 @@ const draft = fs.readFileSync(DRAFT_PATH, 'utf8');
 const readme = draft.replace(/#version#/g, manifest.version);
 
 fs.writeFileSync(README_PATH, readme);
-console.log(`readme.md was created`);
+console.log('README.md was created');
 
 
 const list = walkSync('src/');

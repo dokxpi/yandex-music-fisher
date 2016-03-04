@@ -22,8 +22,9 @@ function httpsGet(url) {
             }
             res.setEncoding('utf8');
             res.on('data', (chunk) => data += chunk);
-            res.on('end', () => resolve(JSON.parse(data)))
+            res.on('end', () => resolve(JSON.parse(data)));
         });
+
         request.on('error', (e) => reject(new Error(e)));
         request.end();
     });
