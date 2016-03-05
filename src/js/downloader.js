@@ -281,7 +281,7 @@ downloader.downloadAlbum = (albumId, artistOrLabelName) => {
                     console.error(`Track error: ${track.error}`, track);
                     return;
                 }
-                albumEntity.size += track.fileSize;
+                albumEntity.size += fisher.downloader.defaultBitrate * (track.durationMs / 1000);
                 albumEntity.duration += track.durationMs;
 
                 const trackPosition = j + 1;
@@ -362,7 +362,7 @@ downloader.downloadPlaylist = (username, playlistId) => {
                 console.error(`Track error: ${track.error}`, track);
                 return;
             }
-            playlistEntity.size += track.fileSize || fisher.downloader.defaultBitrate * (track.durationMs / 1000);
+            playlistEntity.size += fisher.downloader.defaultBitrate * (track.durationMs / 1000);
             playlistEntity.duration += track.durationMs;
             const trackEntity = {
                 type: downloader.TYPE.TRACK,

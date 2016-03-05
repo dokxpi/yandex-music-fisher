@@ -63,10 +63,15 @@ chrome.tabs.onActivated.addListener((activeInfo) => { // переключени�
 });
 
 chrome.runtime.onMessage.addListener((request) => {
-    if (!request || request.action !== 'downloadCurrentTrack' || !('link' in request)) {
+    if (!request || request.action !== 'downloadCurrentTrack' || !request.link) {
         return;
     }
     const page = fisher.utils.getUrlInfo(fisher.yandex.baseUrl + request.link);
+
+    if (!page.isTrack || page.albumId === 'undefined') {
+        // временный патч, пока не пофиксят на яндекс.музыке externalAPI.getCurrentTrack().link
+        return;
+    }
 
     downloader.downloadTrack(page.trackId, page.albumId);
 });

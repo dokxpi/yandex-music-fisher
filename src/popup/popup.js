@@ -1,9 +1,9 @@
 const $ = document.getElementById.bind(document);
 
-let backgroundPage;
+let background;
 let updateIntervalId;
 
-window.onerror = (message, file, line, col, error) => backgroundPage.onerror(message, file, line, col, error);
+window.onerror = (message, file, line, col, error) => background.onerror(message, file, line, col, error);
 
 function generateListView(entity) {
     const totalTrackSize = entity.size;
@@ -14,8 +14,8 @@ function generateListView(entity) {
         finished: 0,
         interrupted: 0
     };
-    const isAlbum = entity.type === backgroundPage.fisher.downloader.TYPE.ALBUM;
-    const isPlaylist = entity.type === backgroundPage.fisher.downloader.TYPE.PLAYLIST;
+    const isAlbum = entity.type === background.fisher.downloader.TYPE.ALBUM;
+    const isPlaylist = entity.type === background.fisher.downloader.TYPE.PLAYLIST;
 
     let loadedTrackSize = 0;
     let loadedTrackCount = 0;
@@ -23,7 +23,7 @@ function generateListView(entity) {
     entity.tracks.forEach((track) => {
         loadedTrackSize += track.loadedBytes;
         totalStatus[track.status]++;
-        if (track.status === backgroundPage.fisher.downloader.STATUS.FINISHED) {
+        if (track.status === background.fisher.downloader.STATUS.FINISHED) {
             loadedTrackCount++;
         }
     });
@@ -42,8 +42,8 @@ function generateListView(entity) {
         name = `Плейлист <strong>${entity.title}</strong>`;
     }
 
-    const loadedTrackSizeStr = backgroundPage.fisher.utils.bytesToStr(loadedTrackSize);
-    const totalTrackSizeStr = backgroundPage.fisher.utils.bytesToStr(totalTrackSize);
+    const loadedTrackSizeStr = background.fisher.utils.bytesToStr(loadedTrackSize);
+    const totalTrackSizeStr = background.fisher.utils.bytesToStr(totalTrackSize);
 
     if (isLoading) {
         status = `<span class="text-primary">Загрузка [${loadedTrackSizeStr} из ${totalTrackSizeStr}]</span>`;
@@ -81,12 +81,12 @@ function generateListView(entity) {
 }
 
 function generateTrackView(entity) {
-    const loadedSize = backgroundPage.fisher.utils.bytesToStr(entity.loadedBytes);
-    const totalSize = backgroundPage.fisher.utils.bytesToStr(entity.track.fileSize);
-    const isWaiting = entity.status === backgroundPage.fisher.downloader.STATUS.WAITING;
-    const isLoading = entity.status === backgroundPage.fisher.downloader.STATUS.LOADING;
-    const isFinished = entity.status === backgroundPage.fisher.downloader.STATUS.FINISHED;
-    const isInterrupted = entity.status === backgroundPage.fisher.downloader.STATUS.INTERRUPTED;
+    const loadedSize = background.fisher.utils.bytesToStr(entity.loadedBytes);
+    const totalSize = background.fisher.utils.bytesToStr(background.fisher.downloader.defaultBitrate * (entity.track.durationMs / 1000));
+    const isWaiting = entity.status === background.fisher.downloader.STATUS.WAITING;
+    const isLoading = entity.status === background.fisher.downloader.STATUS.LOADING;
+    const isFinished = entity.status === background.fisher.downloader.STATUS.FINISHED;
+    const isInterrupted = entity.status === background.fisher.downloader.STATUS.INTERRUPTED;
 
     let status = '';
 
@@ -121,21 +121,21 @@ function generateTrackView(entity) {
 }
 
 function updateDownloader() {
-    const downloads = backgroundPage.fisher.downloader.downloads;
+    const downloads = background.fisher.downloader.downloads;
 
     let content = '';
 
     if (!downloads.size) {
-        content += '<div class="alert alert-info alert-empty-downloads">';
+        content += '<div class="alert alert-info">';
         content += '<strong>Загрузок нет</strong>';
         content += '<br /><br />';
         content += '<p>Чтобы скачать музыку перейдите на сервис Яндекс.Музыка или Яндекс.Радио</p>';
         content += '</div>';
     }
     downloads.forEach((entity) => {
-        const isAlbum = entity.type === backgroundPage.fisher.downloader.TYPE.ALBUM;
-        const isPlaylist = entity.type === backgroundPage.fisher.downloader.TYPE.PLAYLIST;
-        const isTrack = entity.type === backgroundPage.fisher.downloader.TYPE.TRACK;
+        const isAlbum = entity.type === background.fisher.downloader.TYPE.ALBUM;
+        const isPlaylist = entity.type === background.fisher.downloader.TYPE.PLAYLIST;
+        const isTrack = entity.type === background.fisher.downloader.TYPE.TRACK;
 
         if (isTrack) {
             content = generateTrackView(entity) + content;
@@ -174,7 +174,7 @@ $('downloadFolderBtn').addEventListener('click', () => chrome.downloads.showDefa
 $('settingsBtn').addEventListener('click', () => chrome.runtime.openOptionsPage());
 
 $('downloadContainer').addEventListener('mousedown', (e) => {
-    const downloads = backgroundPage.fisher.downloader.downloads;
+    const downloads = background.fisher.downloader.downloads;
     const isRemoveBtnClick = e.target.classList.contains('remove-btn') || e.target.parentNode.classList.contains('remove-btn');
     const isRestoreBtnClick = e.target.classList.contains('restore-btn') || e.target.parentNode.classList.contains('restore-btn');
 
@@ -189,44 +189,44 @@ $('downloadContainer').addEventListener('mousedown', (e) => {
     }
 
     const entity = downloads.get(downloadId);
-    const isAlbum = entity.type === backgroundPage.fisher.downloader.TYPE.ALBUM;
+    const isAlbum = entity.type === background.fisher.downloader.TYPE.ALBUM;
     const isCover = isAlbum && entity.cover;
-    const isPlaylist = entity.type === backgroundPage.fisher.downloader.TYPE.PLAYLIST;
-    const isTrack = entity.type === backgroundPage.fisher.downloader.TYPE.TRACK;
+    const isPlaylist = entity.type === background.fisher.downloader.TYPE.PLAYLIST;
+    const isTrack = entity.type === background.fisher.downloader.TYPE.TRACK;
 
     if (isRemoveBtnClick) {
-        if (isCover && entity.cover.status === backgroundPage.fisher.downloader.STATUS.LOADING) {
-            backgroundPage.fisher.downloader.activeThreadCount--;
+        if (isCover && entity.cover.status === background.fisher.downloader.STATUS.LOADING) {
+            background.fisher.downloader.activeThreadCount--;
         }
         if (isTrack) {
-            if (entity.status === backgroundPage.fisher.downloader.STATUS.LOADING) {
-                backgroundPage.fisher.downloader.activeThreadCount--;
+            if (entity.status === background.fisher.downloader.STATUS.LOADING) {
+                background.fisher.downloader.activeThreadCount--;
             }
         } else if (isAlbum || isPlaylist) {
             entity.tracks.forEach((track) => {
-                if (track.status === backgroundPage.fisher.downloader.STATUS.LOADING) {
-                    backgroundPage.fisher.downloader.activeThreadCount--;
+                if (track.status === background.fisher.downloader.STATUS.LOADING) {
+                    background.fisher.downloader.activeThreadCount--;
                 }
             });
         }
         downloads.delete(downloadId);
-        backgroundPage.fisher.downloader.runAllThreads();
+        background.fisher.downloader.runAllThreads();
     } else if (isRestoreBtnClick) {
-        if (isCover && entity.cover.status === backgroundPage.fisher.downloader.STATUS.INTERRUPTED) {
+        if (isCover && entity.cover.status === background.fisher.downloader.STATUS.INTERRUPTED) {
             entity.cover.attemptCount = 0;
-            entity.cover.status = backgroundPage.fisher.downloader.STATUS.WAITING;
-            backgroundPage.fisher.downloader.download();
+            entity.cover.status = background.fisher.downloader.STATUS.WAITING;
+            background.fisher.downloader.download();
         }
         if (isTrack) {
             entity.attemptCount = 0;
-            entity.status = backgroundPage.fisher.downloader.STATUS.WAITING;
-            backgroundPage.fisher.downloader.download();
+            entity.status = background.fisher.downloader.STATUS.WAITING;
+            background.fisher.downloader.download();
         } else if (isAlbum || isPlaylist) {
             entity.tracks.forEach((track) => {
-                if (track.status === backgroundPage.fisher.downloader.STATUS.INTERRUPTED) {
+                if (track.status === background.fisher.downloader.STATUS.INTERRUPTED) {
                     track.attemptCount = 0;
-                    track.status = backgroundPage.fisher.downloader.STATUS.WAITING;
-                    backgroundPage.fisher.downloader.download();
+                    track.status = background.fisher.downloader.STATUS.WAITING;
+                    background.fisher.downloader.download();
                 }
             });
         }
@@ -243,14 +243,14 @@ $('startDownloadBtn').addEventListener('click', () => {
             const trackId = $('startDownloadBtn').getAttribute('data-trackId');
             const albumId = $('startDownloadBtn').getAttribute('data-albumId');
 
-            backgroundPage.fisher.downloader.downloadTrack(trackId, albumId);
+            background.fisher.downloader.downloadTrack(trackId, albumId);
             break;
         }
         case 'album':
         {
             const albumId = $('startDownloadBtn').getAttribute('data-albumId');
 
-            backgroundPage.fisher.downloader.downloadAlbum(albumId, null);
+            background.fisher.downloader.downloadAlbum(albumId, null);
             break;
         }
         case 'playlist':
@@ -258,7 +258,7 @@ $('startDownloadBtn').addEventListener('click', () => {
             const username = $('startDownloadBtn').getAttribute('data-username');
             const playlistId = $('startDownloadBtn').getAttribute('data-playlistId');
 
-            backgroundPage.fisher.downloader.downloadPlaylist(username, playlistId);
+            background.fisher.downloader.downloadPlaylist(username, playlistId);
             break;
         }
         case 'artistOrLabel':
@@ -270,7 +270,7 @@ $('startDownloadBtn').addEventListener('click', () => {
 
             allElems.forEach((albumElem) => {
                 if (albumElem.checked) {
-                    backgroundPage.fisher.downloader.downloadAlbum(albumElem.value, name);
+                    background.fisher.downloader.downloadAlbum(albumElem.value, name);
                 }
             });
             break;
@@ -291,7 +291,7 @@ function generateDownloadArtist(artist) {
         $('downloadTop10Tracks').classList.remove('hidden');
         $('downloadTop10Tracks').addEventListener('click', () => {
             artist.tracks.forEach((track) => {
-                backgroundPage.fisher.downloader.downloadTrack(track.id, track.albums[0].id);
+                background.fisher.downloader.downloadTrack(track.id, track.albums[0].id);
             });
             $('downloadBtn').click();
         });
@@ -444,7 +444,7 @@ function generateDownloadLabel(label) {
             albumContent += `<label class="label-year">${year === 0 ? 'Год не указан' : year}</label>`;
             albumContent += '</div>';
         }
-        const artists = backgroundPage.fisher.utils.parseArtists(album.artists).artists.join(', ');
+        const artists = background.fisher.utils.parseArtists(album.artists).artists.join(', ');
 
         let title = `<strong>${album.title}</strong>`;
 
@@ -489,11 +489,12 @@ function generateDownloadLabel(label) {
 }
 
 function generateDownloadTrack(track) {
-    const artists = backgroundPage.fisher.utils.parseArtists(track.artists).artists.join(', ');
-    const size = backgroundPage.fisher.utils.bytesToStr(track.fileSize);
-    const duration = backgroundPage.fisher.utils.durationToStr(track.durationMs);
+    const size = background.fisher.downloader.defaultBitrate * (track.durationMs / 1000);
+    const artists = background.fisher.utils.parseArtists(track.artists).artists.join(', ');
+    const sizeStr = background.fisher.utils.bytesToStr(size);
+    const duration = background.fisher.utils.durationToStr(track.durationMs);
     const label = '<span class="label label-default">Трек</span>';
-    const sizeBadge = `<span class="badge">${size}</span>`;
+    const sizeBadge = `<span class="badge">${sizeStr}</span>`;
     const durationBadge = `<span class="badge">${duration}</span>`;
 
     $('name').innerHTML = `${artists} - ${track.title} ${label}`;
@@ -501,14 +502,14 @@ function generateDownloadTrack(track) {
 }
 
 function generateDownloadAlbum(album) {
-    const artists = backgroundPage.fisher.utils.parseArtists(album.artists).artists.join(', ');
+    const artists = background.fisher.utils.parseArtists(album.artists).artists.join(', ');
     const label = '<span class="label label-default">Альбом</span>';
 
     $('name').innerHTML = `${artists} - ${album.title} ${label}`;
     if (!album.trackCount) {
         $('info').innerText = 'Пустой альбом';
         $('startDownloadBtn').style.display = 'none';
-        backgroundPage.console.info(`Empty album: ${album.id}`);
+        background.console.info(`Empty album: ${album.id}`);
         return;
     }
     let size = 0;
@@ -519,12 +520,12 @@ function generateDownloadAlbum(album) {
             if ('error' in track) {
                 return;
             }
-            size += track.fileSize;
+            size += background.fisher.downloader.defaultBitrate * (track.durationMs / 1000);
             duration += track.durationMs;
         });
     });
-    const sizeStr = backgroundPage.fisher.utils.bytesToStr(size);
-    const durationStr = backgroundPage.fisher.utils.durationToStr(duration);
+    const sizeStr = background.fisher.utils.bytesToStr(size);
+    const durationStr = background.fisher.utils.durationToStr(duration);
     const trackCountBadge = `<span class="badge">${album.trackCount}</span>`;
     const sizeBadge = `<span class="badge">${sizeStr}</span>`;
     const durationBadge = `<span class="badge">${durationStr}</span>`;
@@ -539,7 +540,7 @@ function generateDownloadPlaylist(playlist) {
     if (!playlist.trackCount) {
         $('info').innerText = 'Пустой плейлист';
         $('startDownloadBtn').style.display = 'none';
-        backgroundPage.console.info(`Empty playlist: ${playlist.owner.login}#${playlist.kind}`);
+        background.console.info(`Empty playlist: ${playlist.owner.login}#${playlist.kind}`);
         return;
     }
     let size = 0;
@@ -549,11 +550,11 @@ function generateDownloadPlaylist(playlist) {
         if ('error' in track) {
             return;
         }
-        size += track.fileSize || backgroundPage.fisher.downloader.defaultBitrate * (track.durationMs / 1000);
+        size += background.fisher.downloader.defaultBitrate * (track.durationMs / 1000);
         duration += track.durationMs;
     });
-    const sizeStr = backgroundPage.fisher.utils.bytesToStr(size);
-    const durationStr = backgroundPage.fisher.utils.durationToStr(duration);
+    const sizeStr = background.fisher.utils.bytesToStr(size);
+    const durationStr = background.fisher.utils.durationToStr(duration);
     const trackCountBadge = `<span class="badge">${playlist.trackCount}</span>`;
     const sizeBadge = `<span class="badge">${sizeStr}</span>`;
     const durationBadge = `<span class="badge">${durationStr}</span>`;
@@ -562,7 +563,7 @@ function generateDownloadPlaylist(playlist) {
 }
 
 function onAjaxFail(error) {
-    backgroundPage.console.error(error);
+    background.console.error(error);
     hidePreloader();
     $('addContainer').classList.add('hidden');
     $('errorContainer').classList.remove('hidden');
@@ -576,20 +577,28 @@ function getBackgroundPage() {
 }
 
 chrome.runtime.onMessage.addListener(async(request) => {
-    if (!request || request.action !== 'getCurrentTrackUrl' || !('link' in request)) {
+    if (!request || request.action !== 'getCurrentTrackUrl' || !request.link) {
         hidePreloader();
         $('downloadBtn').click();
         $('addBtn').disabled = true;
         return;
     }
-    const url = backgroundPage.fisher.yandex.baseUrl + request.link;
-    const page = backgroundPage.fisher.utils.getUrlInfo(url);
+    const url = background.fisher.yandex.baseUrl + request.link;
+    const page = background.fisher.utils.getUrlInfo(url);
     const downloadBtn = $('startDownloadBtn');
+
+    if (!page.isTrack || page.albumId === 'undefined') {
+        // временный патч, пока не пофиксят на яндекс.музыке externalAPI.getCurrentTrack().link
+        hidePreloader();
+        $('downloadBtn').click();
+        $('addBtn').disabled = true;
+        return;
+    }
 
     downloadBtn.setAttribute('data-type', 'track');
     downloadBtn.setAttribute('data-trackId', page.trackId);
     downloadBtn.setAttribute('data-albumId', page.albumId);
-    if (backgroundPage.fisher.storage.current.singleClickDownload) {
+    if (background.fisher.storage.current.singleClickDownload) {
         hidePreloader();
         downloadBtn.click();
         return;
@@ -597,7 +606,7 @@ chrome.runtime.onMessage.addListener(async(request) => {
     let json;
 
     try {
-        json = await backgroundPage.fisher.yandex.getTrack(page.trackId, page.albumId);
+        json = await background.fisher.yandex.getTrack(page.trackId, page.albumId);
     } catch (e) {
         onAjaxFail(e);
         return;
@@ -607,24 +616,24 @@ chrome.runtime.onMessage.addListener(async(request) => {
 });
 
 async function loadPopup() {
-    backgroundPage = await getBackgroundPage();
+    background = await getBackgroundPage();
     let activeTab;
 
     try {
-        activeTab = await backgroundPage.fisher.utils.getActiveTab();
+        activeTab = await background.fisher.utils.getActiveTab();
     } catch (e) {
         onAjaxFail(e);
         return;
     }
 
-    const page = backgroundPage.fisher.utils.getUrlInfo(activeTab.url);
+    const page = background.fisher.utils.getUrlInfo(activeTab.url);
     const downloadBtn = $('startDownloadBtn');
 
     if (page.isPlaylist) {
         downloadBtn.setAttribute('data-type', 'playlist');
         downloadBtn.setAttribute('data-username', page.username);
         downloadBtn.setAttribute('data-playlistId', page.playlistId);
-        if (backgroundPage.fisher.storage.current.singleClickDownload) {
+        if (background.fisher.storage.current.singleClickDownload) {
             hidePreloader();
             downloadBtn.click();
             return;
@@ -632,7 +641,7 @@ async function loadPopup() {
         let playlist;
 
         try {
-            playlist = await backgroundPage.fisher.yandex.getPlaylist(page.username, page.playlistId);
+            playlist = await background.fisher.yandex.getPlaylist(page.username, page.playlistId);
         } catch (e) {
             onAjaxFail(e);
             return;
@@ -643,7 +652,7 @@ async function loadPopup() {
         downloadBtn.setAttribute('data-type', 'track');
         downloadBtn.setAttribute('data-trackId', page.trackId);
         downloadBtn.setAttribute('data-albumId', page.albumId);
-        if (backgroundPage.fisher.storage.current.singleClickDownload) {
+        if (background.fisher.storage.current.singleClickDownload) {
             hidePreloader();
             downloadBtn.click();
             return;
@@ -651,7 +660,7 @@ async function loadPopup() {
         let json;
 
         try {
-            json = await backgroundPage.fisher.yandex.getTrack(page.trackId, page.albumId);
+            json = await background.fisher.yandex.getTrack(page.trackId, page.albumId);
         } catch (e) {
             onAjaxFail(e);
             return;
@@ -661,7 +670,7 @@ async function loadPopup() {
     } else if (page.isAlbum) {
         downloadBtn.setAttribute('data-type', 'album');
         downloadBtn.setAttribute('data-albumId', page.albumId);
-        if (backgroundPage.fisher.storage.current.singleClickDownload) {
+        if (background.fisher.storage.current.singleClickDownload) {
             hidePreloader();
             downloadBtn.click();
             return;
@@ -669,7 +678,7 @@ async function loadPopup() {
         let album;
 
         try {
-            album = await backgroundPage.fisher.yandex.getAlbum(page.albumId);
+            album = await background.fisher.yandex.getAlbum(page.albumId);
         } catch (e) {
             onAjaxFail(e);
             return;
@@ -681,7 +690,7 @@ async function loadPopup() {
         let artist;
 
         try {
-            artist = await backgroundPage.fisher.yandex.getArtist(page.artistId);
+            artist = await background.fisher.yandex.getArtist(page.artistId);
         } catch (e) {
             onAjaxFail(e);
             return;
@@ -694,7 +703,7 @@ async function loadPopup() {
         let label;
 
         try {
-            label = await backgroundPage.fisher.yandex.getLabel(page.labelId);
+            label = await background.fisher.yandex.getLabel(page.labelId);
         } catch (e) {
             onAjaxFail(e);
             return;
