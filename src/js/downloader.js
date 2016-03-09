@@ -19,7 +19,8 @@ const downloader = {
     downloads: new Map(),
     downloadsLastIndex: 0,
     activeThreadCount: 0,
-    defaultBitrate: 192 * 1000 / 8 // кбиты -> байты
+    minBitrate: 192 * 1000 / 8, // кбиты -> байты
+    maxBitrate: 320 * 1000 / 8
 };
 
 downloader.runAllThreads = () => {
@@ -234,8 +235,6 @@ downloader.downloadAlbum = (albumId, artistOrLabelName) => {
         const albumEntity = {
             type: downloader.TYPE.ALBUM,
             index: downloader.downloadsLastIndex++,
-            duration: 0,
-            size: 0,
             artists: fisher.utils.parseArtists(album.artists).artists.join(', '),
             title: album.title,
             tracks: [],
@@ -281,9 +280,6 @@ downloader.downloadAlbum = (albumId, artistOrLabelName) => {
                     console.error(`Track error: ${track.error}`, track);
                     return;
                 }
-                albumEntity.size += fisher.downloader.defaultBitrate * (track.durationMs / 1000);
-                albumEntity.duration += track.durationMs;
-
                 const trackPosition = j + 1;
                 const albumPosition = i + 1;
                 const trackEntity = {
@@ -348,8 +344,6 @@ downloader.downloadPlaylist = (username, playlistId) => {
         const playlistEntity = {
             type: downloader.TYPE.PLAYLIST,
             index: downloader.downloadsLastIndex++,
-            duration: 0,
-            size: 0,
             title: playlist.title,
             tracks: []
         };
@@ -362,8 +356,6 @@ downloader.downloadPlaylist = (username, playlistId) => {
                 console.error(`Track error: ${track.error}`, track);
                 return;
             }
-            playlistEntity.size += fisher.downloader.defaultBitrate * (track.durationMs / 1000);
-            playlistEntity.duration += track.durationMs;
             const trackEntity = {
                 type: downloader.TYPE.TRACK,
                 index: playlistEntity.index,

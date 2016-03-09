@@ -37,9 +37,10 @@ function bytesToStr(bytes) {
     const GiB = 1024 * MiB;
 
     if (bytes < GiB) {
-        return `${(bytes / MiB).toFixed(2)} МиБ`;
+        return `${(bytes / MiB).toFixed(1)} МБ`;
+    } else {
+        return `${(bytes / GiB).toFixed(1)} ГБ`;
     }
-    return `${(bytes / GiB).toFixed(2)} ГиБ`;
 }
 
 function addExtraZeros(val, max) {
@@ -56,7 +57,7 @@ function addExtraZeros(val, max) {
 }
 
 function durationToStr(duration) {
-    let seconds = Math.floor(duration / 1000);
+    let seconds = Math.floor(duration);
     let minutes = Math.floor(seconds / 60);
 
     seconds -= minutes * 60;

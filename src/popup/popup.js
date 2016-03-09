@@ -6,7 +6,6 @@ let updateIntervalId;
 window.onerror = (message, file, line, col, error) => background.onerror(message, file, line, col, error);
 
 function generateListView(entity) {
-    const totalTrackSize = entity.size;
     const totalTrackCount = entity.tracks.length;
     const totalStatus = {
         waiting: 0,
@@ -17,6 +16,7 @@ function generateListView(entity) {
     const isAlbum = entity.type === background.fisher.downloader.TYPE.ALBUM;
     const isPlaylist = entity.type === background.fisher.downloader.TYPE.PLAYLIST;
 
+    let totalTrackDuration = 0;
     let loadedTrackSize = 0;
     let loadedTrackCount = 0;
 
@@ -26,8 +26,11 @@ function generateListView(entity) {
         if (track.status === background.fisher.downloader.STATUS.FINISHED) {
             loadedTrackCount++;
         }
+        totalTrackDuration += track.track.durationMs / 1000;
     });
 
+    const totalTrackMinSize = background.fisher.downloader.minBitrate * totalTrackDuration;
+    const totalTrackMaxSize = background.fisher.downloader.maxBitrate * totalTrackDuration;
     const isLoading = totalStatus.loading > 0;
     const isInterrupted = !isLoading && totalStatus.interrupted > 0;
     const isFinished = !isInterrupted && totalStatus.finished === totalTrackCount;
@@ -43,19 +46,20 @@ function generateListView(entity) {
     }
 
     const loadedTrackSizeStr = background.fisher.utils.bytesToStr(loadedTrackSize);
-    const totalTrackSizeStr = background.fisher.utils.bytesToStr(totalTrackSize);
+    const totalTrackMinSizeStr = background.fisher.utils.bytesToStr(totalTrackMinSize);
+    const totalTrackMaxSizeStr = background.fisher.utils.bytesToStr(totalTrackMaxSize);
 
     if (isLoading) {
-        status = `<span class="text-primary">Загрузка [${loadedTrackSizeStr} из ${totalTrackSizeStr}]</span>`;
+        status = `<span class="text-primary">Загрузка: ${loadedTrackSizeStr} из [${totalTrackMinSizeStr} - ${totalTrackMaxSizeStr}]</span>`;
     } else if (isInterrupted) {
-        status = `<span class="text-danger">Ошибка [скачано ${loadedTrackSizeStr} из ${totalTrackSizeStr}]</span>`;
+        status = '<span class="text-danger">Опаньки... Попробуйте нажать голубую кнопку справа &rarr;</span>';
     } else if (isFinished) {
-        status = `<span class="text-success">Сохранён [${totalTrackSizeStr}]</span>`;
+        status = `<span class="text-success">Сохранён [${loadedTrackSizeStr}]</span>`;
     } else if (isWaiting) {
-        status = `<span class="text-muted">В очереди [${totalTrackSizeStr}]</span>`;
+        status = `<span class="text-muted">В очереди [${totalTrackMinSizeStr} - ${totalTrackMaxSizeStr}]</span>`;
     }
 
-    const loadedSizePercent = Math.floor(loadedTrackSize / totalTrackSize * 100);
+    const loadedSizePercent = Math.floor(loadedTrackCount / totalTrackCount * 100);
 
     let view = '<div class="panel panel-default">';
 
@@ -81,8 +85,12 @@ function generateListView(entity) {
 }
 
 function generateTrackView(entity) {
-    const loadedSize = background.fisher.utils.bytesToStr(entity.loadedBytes);
-    const totalSize = background.fisher.utils.bytesToStr(background.fisher.downloader.defaultBitrate * (entity.track.durationMs / 1000));
+    const duration = entity.track.durationMs / 1000;
+    const minSize = background.fisher.downloader.minBitrate * duration;
+    const maxSize = background.fisher.downloader.maxBitrate * duration;
+    const minSizeStr = background.fisher.utils.bytesToStr(minSize);
+    const maxSizeStr = background.fisher.utils.bytesToStr(maxSize);
+    const loadedSizeStr = background.fisher.utils.bytesToStr(entity.loadedBytes);
     const isWaiting = entity.status === background.fisher.downloader.STATUS.WAITING;
     const isLoading = entity.status === background.fisher.downloader.STATUS.LOADING;
     const isFinished = entity.status === background.fisher.downloader.STATUS.FINISHED;
@@ -91,13 +99,13 @@ function generateTrackView(entity) {
     let status = '';
 
     if (isWaiting) {
-        status = `<span class="text-muted">В очереди [${totalSize}]</span>`;
+        status = `<span class="text-muted">В очереди [${minSizeStr} - ${maxSizeStr}]</span>`;
     } else if (isLoading) {
-        status = `<span class="text-primary">Загрузка [${loadedSize} из ${totalSize}]</span>`;
+        status = `<span class="text-primary">Загрузка: ${loadedSizeStr} из [${minSizeStr} - ${maxSizeStr}]</span>`;
     } else if (isFinished) {
-        status = `<span class="text-success">Сохранён [${totalSize}]</span>`;
+        status = `<span class="text-success">Сохранён [${loadedSizeStr}]</span>`;
     } else if (isInterrupted) {
-        status = `<span class="text-danger">Ошибка [скачано ${loadedSize} из ${totalSize}]</span>`;
+        status = '<span class="text-danger">Опаньки... Попробуйте нажать голубую кнопку справа &rarr;</span>';
     }
 
     let view = '<div class="panel panel-default">';
@@ -489,13 +497,16 @@ function generateDownloadLabel(label) {
 }
 
 function generateDownloadTrack(track) {
-    const size = background.fisher.downloader.defaultBitrate * (track.durationMs / 1000);
+    const duration = track.durationMs / 1000;
+    const sizeMin = background.fisher.downloader.minBitrate * duration;
+    const sizeMax = background.fisher.downloader.maxBitrate * duration;
     const artists = background.fisher.utils.parseArtists(track.artists).artists.join(', ');
-    const sizeStr = background.fisher.utils.bytesToStr(size);
-    const duration = background.fisher.utils.durationToStr(track.durationMs);
+    const sizeStrMin = background.fisher.utils.bytesToStr(sizeMin);
+    const sizeStrMax = background.fisher.utils.bytesToStr(sizeMax);
+    const durationStr = background.fisher.utils.durationToStr(duration);
     const label = '<span class="label label-default">Трек</span>';
-    const sizeBadge = `<span class="badge">${sizeStr}</span>`;
-    const durationBadge = `<span class="badge">${duration}</span>`;
+    const sizeBadge = `<span class="badge">${sizeStrMin} - ${sizeStrMax}</span>`;
+    const durationBadge = `<span class="badge">${durationStr}</span>`;
 
     $('name').innerHTML = `${artists} - ${track.title} ${label}`;
     $('info').innerHTML = `${sizeBadge} ${durationBadge}`;
@@ -512,7 +523,6 @@ function generateDownloadAlbum(album) {
         background.console.info(`Empty album: ${album.id}`);
         return;
     }
-    let size = 0;
     let duration = 0;
 
     album.volumes.forEach((volume) => {
@@ -520,14 +530,16 @@ function generateDownloadAlbum(album) {
             if ('error' in track) {
                 return;
             }
-            size += background.fisher.downloader.defaultBitrate * (track.durationMs / 1000);
-            duration += track.durationMs;
+            duration += track.durationMs / 1000;
         });
     });
-    const sizeStr = background.fisher.utils.bytesToStr(size);
+    const minSize = background.fisher.downloader.minBitrate * duration;
+    const maxSize = background.fisher.downloader.maxBitrate * duration;
+    const minSizeStr = background.fisher.utils.bytesToStr(minSize);
+    const maxSizeStr = background.fisher.utils.bytesToStr(maxSize);
     const durationStr = background.fisher.utils.durationToStr(duration);
     const trackCountBadge = `<span class="badge">${album.trackCount}</span>`;
-    const sizeBadge = `<span class="badge">${sizeStr}</span>`;
+    const sizeBadge = `<span class="badge">${minSizeStr} - ${maxSizeStr}</span>`;
     const durationBadge = `<span class="badge">${durationStr}</span>`;
 
     $('info').innerHTML = `${trackCountBadge} ${sizeBadge} ${durationBadge}`;
@@ -543,20 +555,22 @@ function generateDownloadPlaylist(playlist) {
         background.console.info(`Empty playlist: ${playlist.owner.login}#${playlist.kind}`);
         return;
     }
-    let size = 0;
     let duration = 0;
 
     playlist.tracks.forEach((track) => {
         if ('error' in track) {
             return;
         }
-        size += background.fisher.downloader.defaultBitrate * (track.durationMs / 1000);
-        duration += track.durationMs;
+        duration += track.durationMs / 1000;
     });
-    const sizeStr = background.fisher.utils.bytesToStr(size);
+
+    const minSize = background.fisher.downloader.minBitrate * duration;
+    const maxSize = background.fisher.downloader.maxBitrate * duration;
+    const minSizeStr = background.fisher.utils.bytesToStr(minSize);
+    const maxSizeStr = background.fisher.utils.bytesToStr(maxSize);
     const durationStr = background.fisher.utils.durationToStr(duration);
     const trackCountBadge = `<span class="badge">${playlist.trackCount}</span>`;
-    const sizeBadge = `<span class="badge">${sizeStr}</span>`;
+    const sizeBadge = `<span class="badge">${minSizeStr} - ${maxSizeStr}</span>`;
     const durationBadge = `<span class="badge">${durationStr}</span>`;
 
     $('info').innerHTML = `${trackCountBadge} ${sizeBadge} ${durationBadge}`;
