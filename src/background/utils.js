@@ -158,20 +158,20 @@ function getUrlInfo(url) {
 function updateTabIcon(tab) {
     const page = getUrlInfo(tab.url);
 
-    let iconPath = 'img/black.png';
+    let icon = 'black';
 
     if (page.isPlaylist) {
-        iconPath = 'img/green.png';
+        icon = 'green';
     } else if (page.isAlbum) {
-        iconPath = 'img/yellow.png';
+        icon = 'yellow';
     } else if (page.isArtist || page.isLabel) {
-        iconPath = 'img/pink.png';
+        icon = 'pink';
     } else if (page.isMusic || page.isRadio) {
-        iconPath = 'img/blue.png';
+        icon = 'blue';
     }
     chrome.browserAction.setIcon({
         tabId: tab.id,
-        path: iconPath
+        path: `background/img/${icon}.png`
     });
 }
 

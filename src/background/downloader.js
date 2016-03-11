@@ -95,6 +95,9 @@ downloader.download = async() => {
             if ('year' in trackAlbum) {
                 writer.setFrame('TYER', trackAlbum.year);
             }
+            if ('labels' in trackAlbum && Array.isArray(trackAlbum.labels) && trackAlbum.labels.length) {
+                writer.setFrame('TPUB', trackAlbum.labels.map((label) => label.name).join(', '));
+            }
         }
 
         if ('title' in entity) {

@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const DRAFT_PATH = path.join(__dirname, 'readme_draft.txt');
+const DRAFT_PATH = path.join(__dirname, 'README.draft.md');
 const README_PATH = path.join(path.dirname(__dirname), 'README.md');
 const manifest = require('../src/manifest.json');
 const JSZip = require('jszip');

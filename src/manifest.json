@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Yandex Music Fisher",
   "description": "Скачивание музыки с сервисов Яндекс.Музыка и Яндекс.Радио",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "permissions": [
     "tabs",
     "storage",
@@ -58,12 +58,10 @@
   "browser_action": {
     "default_title": "Yandex Music Fisher",
     "default_popup": "popup/popup.html",
-    "default_icon": "img/black.png"
+    "default_icon": "background/img/black.png"
   },
   "icons": {
-    "16": "img/icon.png",
-    "48": "img/icon.png",
-    "128": "img/icon.png"
+    "128": "background/img/icon.png"
   },
   "homepage_url": "https://github.com/egoroof/yandex-music-fisher"
 }

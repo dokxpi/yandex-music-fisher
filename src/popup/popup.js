@@ -337,7 +337,7 @@ function generateDownloadArtist(artist) {
 
         const coverUrl = album.coverUri
             ? `https://${album.coverUri.replace('%%', '70x70')}`
-            : '../img/default_cover.png';
+            : 'img/default_cover.png';
 
         albumContent += '<div class="panel-body">';
         albumContent += '   <label>';
@@ -383,7 +383,7 @@ function generateDownloadArtist(artist) {
 
         const coverUrl = album.coverUri
             ? `https://${album.coverUri.replace('%%', '70x70')}`
-            : '../img/default_cover.png';
+            : 'img/default_cover.png';
 
         compilationContent += '<div class="panel-body">';
         compilationContent += '   <label>';
@@ -462,7 +462,7 @@ function generateDownloadLabel(label) {
 
         const coverUrl = album.coverUri
             ? `https://${album.coverUri.replace('%%', '70x70')}`
-            : '../img/default_cover.png';
+            : 'img/default_cover.png';
 
         const name = `<span class="badge">${album.trackCount}</span> ${artists} - ${title}`;
 
