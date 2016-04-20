@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Yandex Music Fisher",
   "description": "Скачивание музыки с сервисов Яндекс.Музыка и Яндекс.Радио",
-  "version": "1.9.0",
+  "version": "1.9.2",
   "permissions": [
     "tabs",
     "storage",

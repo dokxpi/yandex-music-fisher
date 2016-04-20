@@ -41,13 +41,13 @@ list.forEach((file) => {
     root.file(file.path, file.data);
 });
 
-const buffer = zip.generate({
+zip.generateAsync({
     type: 'nodebuffer',
     compression: 'DEFLATE',
     compressionOptions: {
         level: 9
     }
-});
-
-fs.writeFileSync(`yandex-music-fisher_${manifest.version}.zip`, buffer);
-console.log(`yandex-music-fisher_${manifest.version}.zip was created`);
+}).then((buffer) => {
+    fs.writeFileSync(`yandex-music-fisher_${manifest.version}.zip`, buffer);
+    console.log(`yandex-music-fisher_${manifest.version}.zip was created`);
+}).catch((e) => console.error(e));
