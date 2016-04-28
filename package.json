@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm prune && npm update && webpack",
     "build-fast": "webpack",
-    "lint": "eslint src/**/*.js",
+    "lint": "eslint -c tools/.eslintrc.js --ignore-pattern src/bundle/** --ignore-pattern src/vendor/** src/**/*.js",
     "increment-version-major": "node tools/increment_version.js --version=major",
     "increment-version-minor": "node tools/increment_version.js --version=minor",
     "increment-version-patch": "node tools/increment_version.js --version=patch",
@@ -40,5 +40,13 @@
     "jszip": "3.0.0",
     "uritemplate": "0.3.4",
     "webpack": "1.12.15"
+  },
+  "babel": {
+    "plugins": [
+      "syntax-async-functions",
+      "transform-async-to-generator",
+      "transform-es2015-parameters",
+      "transform-strict-mode"
+    ]
   }
 }

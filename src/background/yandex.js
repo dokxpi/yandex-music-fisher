@@ -35,10 +35,20 @@ class Yandex {
     }
 
     getArtist(artistId) {
-        const url = `${this.baseUrl}/handlers/artist.jsx?artist=${artistId}&what=albums`;
+        const url = `${this.baseUrl}/handlers/artist.jsx?artist=${artistId}&what=`;
+        let artist;
 
-        return fetch(url, options)
-            .then(fisher.utils.parseJsonResponse);
+        return fetch(`${url}albums`, options)
+            .then(fisher.utils.parseJsonResponse)
+            .then((json) => {
+                artist = json;
+                return fetch(`${url}tracks`, options);
+            })
+            .then(fisher.utils.parseJsonResponse)
+            .then((json) => {
+                artist.tracks = json.tracks;
+                return artist;
+            });
     }
 
     getAlbum(albumId) {

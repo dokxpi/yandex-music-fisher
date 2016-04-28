@@ -45,9 +45,15 @@
             <p id="info"></p>
         </div>
 
-        <button id="downloadTop10Tracks" type="button" class="btn btn-sm btn-success btn-sm hidden">
-            <i class="glyphicon glyphicon-star"></i> Скачать 10 лучших треков
-        </button>
+        <div>
+            <ul class="list-inline">
+                <li><button id="downloadTopTracks" type="button" class="btn btn-sm btn-success btn-sm">
+                    <i class="glyphicon glyphicon-star"></i> Скачать
+                </button></li>
+                <li><input type="number" id="numOfTopTracks" min="1" value="10" max="99"></li>
+                <li>лучших треков</li>
+            </ul>
+        </div>
 
         <div id="albums"></div>
         <div id="compilations"></div>
