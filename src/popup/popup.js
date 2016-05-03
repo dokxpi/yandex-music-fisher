@@ -296,10 +296,10 @@ function hidePreloader() {
 
 function generateDownloadArtist(artist) {
     if (artist.tracks.length) {
-        $('downloadTopTracks').classList.remove('hidden');
+        $('downloadTopTracks').parentNode.parentNode.classList.remove('hidden');
         $('downloadTopTracks').addEventListener('click', () => {
             artist.tracks.slice(0, parseInt($('numOfTopTracks').value)).forEach((track) => {
-                background.fisher.downloader.downloadTrack(track.id, track.albums[0].id);
+                background.fisher.downloader.downloadTrack(track.id, track.albums[0].id, artist.artist.name);
             });
             $('downloadBtn').click();
         });

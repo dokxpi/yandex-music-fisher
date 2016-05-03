@@ -7,8 +7,8 @@ h3 {
     margin-left: -18px;
 }
 
-select {
-    width: 94px;
+select, input[type=text] {
+    width: 114px;
 }
 
 input[type=checkbox] {

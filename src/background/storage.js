@@ -8,7 +8,9 @@ const storage = {
         enumeratePlaylists: false,
         shouldNotifyAboutUpdates: true,
         singleClickDownload: false,
-        backgroundDownload: false
+        backgroundDownload: false,
+        shouldUseFolder: false,
+        folder: 'music'
     },
     current: {}
 };

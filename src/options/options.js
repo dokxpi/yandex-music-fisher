@@ -5,12 +5,16 @@ const checkboxes = [
     'enumeratePlaylists',
     'shouldNotifyAboutUpdates',
     'singleClickDownload',
-    'backgroundDownload'
+    'backgroundDownload',
+    'shouldUseFolder'
 ];
 const selects = [
     'downloadThreadCount',
     'albumCoverSize',
     'albumCoverSizeId3'
+];
+const texts = [
+    'folder'
 ];
 
 let backgroundPage;
@@ -30,6 +34,12 @@ function afterCheckboxChanged(checkbox) { // изменение UI
             $('albumCoverSize').removeAttribute('disabled');
         } else {
             $('albumCoverSize').setAttribute('disabled', 'disabled');
+        }
+    } else if (checkbox === 'shouldUseFolder') {
+        if (checked) {
+            $('folder').removeAttribute('disabled');
+        } else {
+            $('folder').setAttribute('disabled', 'disabled');
         }
     } else if (checkbox === 'backgroundDownload') {
         const permissions = {
@@ -88,6 +98,20 @@ selects.forEach((select) => {
     });
 });
 
+texts.forEach((text) => {
+    $(text).addEventListener('input', () => {
+        let value = $(text).value;
+
+        if (text === 'folder') {
+            value = backgroundPage.fisher.utils.clearPath(value, true);
+            if (value === '') {
+                return; // не сохраняем
+            }
+        }
+        saveSetting(text, value);
+    });
+});
+
 $('btnReset').addEventListener('click', async() => {
     await backgroundPage.fisher.storage.resetAll();
     backgroundPage.fisher.storage.load();
@@ -110,6 +134,10 @@ async function loadOptions() {
 
     selects.forEach((select) => {
         $(select).value = backgroundPage.fisher.storage.current[select];
+    });
+
+    texts.forEach((text) => {
+        $(text).value = backgroundPage.fisher.storage.current[text];
     });
 }
 
