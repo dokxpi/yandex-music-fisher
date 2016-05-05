@@ -26,20 +26,20 @@
   },
   "homepage": "https://github.com/egoroof/yandex-music-fisher#readme",
   "devDependencies": {
-    "babel-core": "6.7.6",
-    "babel-eslint": "6.0.3",
+    "babel-core": "6.8.0",
+    "babel-eslint": "6.0.4",
     "babel-loader": "6.2.4",
-    "babel-plugin-syntax-async-functions": "6.5.0",
-    "babel-plugin-transform-async-to-generator": "6.7.4",
-    "babel-plugin-transform-es2015-parameters": "6.7.0",
-    "babel-plugin-transform-strict-mode": "6.6.5",
+    "babel-plugin-syntax-async-functions": "6.8.0",
+    "babel-plugin-transform-async-to-generator": "6.8.0",
+    "babel-plugin-transform-es2015-parameters": "6.8.0",
+    "babel-plugin-transform-strict-mode": "6.8.0",
     "blueimp-md5": "2.3.0",
-    "browser-id3-writer": "2.2.1",
-    "eslint": "2.8.0",
+    "browser-id3-writer": "2.3.0",
+    "eslint": "2.9.0",
     "eslint-plugin-babel": "3.2.0",
     "jszip": "3.0.0",
     "uritemplate": "0.3.4",
-    "webpack": "1.12.15"
+    "webpack": "1.13.0"
   },
   "babel": {
     "plugins": [
