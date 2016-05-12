@@ -7,7 +7,10 @@ module.exports = {
         "node": true
     },
     "globals": {
-        "chrome": false
+        "chrome": false,
+        "PLATFORM_OPERA": false,
+        "PLATFORM_FIREFOX": false,
+        "PLATFORM_CHROMIUM": false
     },
     "plugins": [
         "babel"

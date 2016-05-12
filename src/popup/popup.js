@@ -3,8 +3,6 @@ const $ = document.getElementById.bind(document);
 let background;
 let updateIntervalId;
 
-window.onerror = (message, file, line, col, error) => background.onerror(message, file, line, col, error);
-
 function generateListView(entity) {
     const totalTrackCount = entity.tracks.length;
     const totalStatus = {
@@ -612,7 +610,7 @@ chrome.runtime.onMessage.addListener(async(request) => {
     downloadBtn.setAttribute('data-type', 'track');
     downloadBtn.setAttribute('data-trackId', page.trackId);
     downloadBtn.setAttribute('data-albumId', page.albumId);
-    if (background.fisher.storage.current.singleClickDownload) {
+    if (background.fisher.storage.getItem('singleClickDownload')) {
         hidePreloader();
         downloadBtn.click();
         return;
@@ -647,7 +645,7 @@ async function loadPopup() {
         downloadBtn.setAttribute('data-type', 'playlist');
         downloadBtn.setAttribute('data-username', page.username);
         downloadBtn.setAttribute('data-playlistId', page.playlistId);
-        if (background.fisher.storage.current.singleClickDownload) {
+        if (background.fisher.storage.getItem('singleClickDownload')) {
             hidePreloader();
             downloadBtn.click();
             return;
@@ -666,7 +664,7 @@ async function loadPopup() {
         downloadBtn.setAttribute('data-type', 'track');
         downloadBtn.setAttribute('data-trackId', page.trackId);
         downloadBtn.setAttribute('data-albumId', page.albumId);
-        if (background.fisher.storage.current.singleClickDownload) {
+        if (background.fisher.storage.getItem('singleClickDownload')) {
             hidePreloader();
             downloadBtn.click();
             return;
@@ -684,7 +682,7 @@ async function loadPopup() {
     } else if (page.isAlbum) {
         downloadBtn.setAttribute('data-type', 'album');
         downloadBtn.setAttribute('data-albumId', page.albumId);
-        if (background.fisher.storage.current.singleClickDownload) {
+        if (background.fisher.storage.getItem('singleClickDownload')) {
             hidePreloader();
             downloadBtn.click();
             return;

@@ -1,5 +1,3 @@
-'use strict';
-
 const https = require('https');
 const fs = require('fs');
 const url = require('url');
@@ -7,7 +5,8 @@ const path = require('path');
 const UriTemplate = require('uritemplate');
 const tokens = require('./tokens.json');
 const manifest = require('../src/manifest.json');
-const assetName = `yandex-music-fisher_${manifest.version}.zip`;
+
+let uploadUrlTemplate;
 
 function post(postUrl, type, data) {
     return new Promise((resolve, reject) => {
@@ -53,7 +52,10 @@ function createGithubRelease() {
     return post(releasesUrl, 'application/json', data);
 }
 
-function uploadGithubAsset(uploadUrl) {
+function uploadGithubAsset(platform) {
+    const ext = (platform === 'firefox') ? 'xpi' : 'zip';
+    const assetName = `yandex-music-fisher_${manifest.version}_${platform}.${ext}`;
+    const uploadUrl = uploadUrlTemplate.expand({name: assetName});
     const buffer = fs.readFileSync(path.join(path.dirname(__dirname), assetName));
 
     return post(uploadUrl, 'application/zip', buffer);
@@ -61,13 +63,11 @@ function uploadGithubAsset(uploadUrl) {
 
 createGithubRelease()
     .then((response) => {
-        const template = UriTemplate.parse(response.upload_url);
-        const uploadUrl = template.expand({name: assetName});
-
         console.log(`GitHub release draft '${manifest.version}' was created`);
-        return uploadGithubAsset(uploadUrl);
+        uploadUrlTemplate = UriTemplate.parse(response.upload_url);
     })
-    .then(() => {
-        console.log(`Asset ${assetName} was added to GitHub release draft`);
-    })
+    .then(() => uploadGithubAsset('chromium'))
+    // .then(() => uploadGithubAsset('firefox'))
+    .then(() => uploadGithubAsset('opera'))
+    .then(() => console.log('All assets were downloaded'))
     .catch((e) => console.error(e));

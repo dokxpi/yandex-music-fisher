@@ -2,14 +2,10 @@
   "manifest_version": 2,
   "name": "Yandex Music Fisher",
   "description": "Скачивание музыки с сервисов Яндекс.Музыка и Яндекс.Радио",
-  "version": "1.10.0",
+  "version": "2.0.1",
   "permissions": [
     "tabs",
-    "storage",
     "downloads",
-    "downloads.shelf",
-    "notifications",
-    "https://api.github.com/",
     "https://music.yandex.ru/",
     "https://music.yandex.ua/",
     "https://music.yandex.kz/",
@@ -17,17 +13,7 @@
     "https://avatars.yandex.net/",
     "https://storage.mds.yandex.net/"
   ],
-  "optional_permissions": [
-    "background"
-  ],
-  "commands": {
-    "download_playing_track": {
-      "description": "Скачать играющий трек",
-      "global": true
-    }
-  },
   "content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self'",
-  "minimum_chrome_version": "45.0",
   "background": {
     "scripts": [
       "bundle/background.bundle.js"

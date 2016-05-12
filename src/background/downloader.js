@@ -24,7 +24,7 @@ const downloader = {
 };
 
 downloader.runAllThreads = () => {
-    for (let i = 0; i < fisher.storage.current.downloadThreadCount; i++) {
+    for (let i = 0; i < fisher.storage.getItem('downloadThreadCount'); i++) {
         downloader.download();
     }
 };
@@ -34,7 +34,7 @@ downloader.download = async() => {
     if (downloader.activeThreadCount < 0) {
         downloader.activeThreadCount = 0; // выравнивание при сбоях
     }
-    if (downloader.activeThreadCount >= fisher.storage.current.downloadThreadCount) {
+    if (downloader.activeThreadCount >= fisher.storage.getItem('downloadThreadCount')) {
         return; // достигнуто максимальное количество потоков загрузки
     }
     const entity = downloader.getWaitingEntity();
@@ -70,7 +70,9 @@ downloader.download = async() => {
         if ('lastError' in chrome.runtime) {
             onInterruptEntity(chrome.runtime.lastError.message);
         } else {
-            chrome.downloads.setShelfEnabled(false);
+            if (PLATFORM_CHROMIUM) {
+                chrome.downloads.setShelfEnabled(false);
+            }
             entity.browserDownloadId = downloadId;
         }
     }
@@ -132,8 +134,8 @@ downloader.download = async() => {
         writer.addTag();
 
         let savePath = entity.savePath;
-        if (fisher.storage.current.shouldUseFolder) {
-            savePath = `${fisher.storage.current.folder}/${savePath}`;
+        if (fisher.storage.getItem('shouldUseFolder')) {
+            savePath = `${fisher.storage.getItem('folder')}/${savePath}`;
         }
 
         chrome.downloads.download({
@@ -150,7 +152,7 @@ downloader.download = async() => {
         }
         if (trackAlbum && 'coverUri' in trackAlbum) {
             // пример альбома без обложки: https://music.yandex.ru/album/2236232/track/23652415
-            const coverUrl = `https://${trackAlbum.coverUri.replace('%%', fisher.storage.current.albumCoverSizeId3)}`;
+            const coverUrl = `https://${trackAlbum.coverUri.replace('%%', fisher.storage.getItem('albumCoverSizeId3'))}`;
 
             try {
                 coverBuffer = await fisher.utils.fetchBuffer(coverUrl);
@@ -188,8 +190,8 @@ downloader.download = async() => {
         const localUrl = window.URL.createObjectURL(blob);
 
         let savePath = entity.savePath;
-        if (fisher.storage.current.shouldUseFolder) {
-            savePath = `${fisher.storage.current.folder}/${savePath}`;
+        if (fisher.storage.getItem('shouldUseFolder')) {
+            savePath = `${fisher.storage.getItem('folder')}/${savePath}`;
         }
 
         chrome.downloads.download({
@@ -277,12 +279,12 @@ downloader.downloadAlbum = (albumId, folder) => {
             saveDir += fisher.utils.clearPath(`${shortAlbumArtists} - ${shortAlbumTitle}`, true);
         }
 
-        if (fisher.storage.current.shouldDownloadCover && 'coverUri' in album) {
+        if (fisher.storage.getItem('shouldDownloadCover') && 'coverUri' in album) {
             albumEntity.cover = {
                 type: downloader.TYPE.COVER,
                 index: albumEntity.index,
                 status: downloader.STATUS.WAITING,
-                url: `https://${album.coverUri.replace('%%', fisher.storage.current.albumCoverSize)}`,
+                url: `https://${album.coverUri.replace('%%', fisher.storage.getItem('albumCoverSize'))}`,
                 savePath: `${saveDir}/cover.jpg`,
                 loadedBytes: 0,
                 attemptCount: 0
@@ -328,7 +330,7 @@ downloader.downloadAlbum = (albumId, folder) => {
                     savePath += `CD${albumPosition}/`;
                 }
 
-                if (fisher.storage.current.enumerateAlbums) {
+                if (fisher.storage.getItem('enumerateAlbums')) {
                     // нумеруем все треки
                     savePath += `${fisher.utils.addExtraZeros(trackPosition, volume.length)}. `;
                 } else if (shortTrackTitle in trackNameCounter) {
@@ -396,7 +398,7 @@ downloader.downloadPlaylist = (username, playlistId) => {
             let name = `${shortTrackArtists} - ${shortTrackTitle}`;
             let savePath = `${saveDir}/`;
 
-            if (fisher.storage.current.enumeratePlaylists) {
+            if (fisher.storage.getItem('enumeratePlaylists')) {
                 // нумеруем все треки
                 savePath += `${fisher.utils.addExtraZeros(i + 1, playlist.tracks.length)}. `;
             } else if (name in trackNameCounter) {

@@ -23,7 +23,6 @@ function dispatchCurrentTrackUrl(action) {
 chrome.runtime.onMessage.addListener((action) => {
     switch (action) {
         case 'getCurrentTrackUrl':
-        case 'downloadCurrentTrack':
             injectCode(dispatchCurrentTrackUrl, action);
             break;
     }

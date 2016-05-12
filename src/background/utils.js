@@ -120,6 +120,9 @@ function getUrlInfo(url) {
         isArtist: false,
         isLabel: false
     };
+    if (!url) {
+        return info;
+    }
     const urlData = new URL(url);
     const parts = urlData.pathname.split('/');
     const musicMatch = urlData.hostname.match(/^music\.yandex\.(ru|by|kz|ua)$/);
@@ -222,38 +225,6 @@ function parseJsonResponse(response) {
     return response.json();
 }
 
-function checkUpdate() {
-    return fetch('https://api.github.com/repos/egoroof/yandex-music-fisher/releases/latest')
-        .then(parseJsonResponse)
-        .then((releaseInfo) => {
-            const result = {
-                isUpdateAvailable: false,
-                version: releaseInfo.tag_name.replace('v', ''),
-                distUrl: releaseInfo.assets[0].browser_download_url
-            };
-            const latestVersion = result.version.split('.');
-            const currentVersion = chrome.runtime.getManifest().version.split('.');
-
-            const isMajorUpdate = Boolean(
-                latestVersion[0] > currentVersion[0]
-            );
-            const isMinorUpdate = Boolean(
-                latestVersion[1] > currentVersion[1] &&
-                latestVersion[0] === currentVersion[0]
-            );
-            const isPatchUpdate = Boolean(
-                latestVersion[2] > currentVersion[2] &&
-                latestVersion[1] === currentVersion[1] &&
-                latestVersion[0] === currentVersion[0]
-            );
-
-            if (isMajorUpdate || isMinorUpdate || isPatchUpdate) {
-                result.isUpdateAvailable = true;
-            }
-            return result;
-        });
-}
-
 module.exports = {
     fetchBuffer,
     delay,
@@ -267,6 +238,5 @@ module.exports = {
     getActiveTab,
     getDownload,
     updateBadge,
-    parseJsonResponse,
-    checkUpdate
+    parseJsonResponse
 };

@@ -4,13 +4,15 @@
   "description": "Downloader for Яндекс.Музыка & Яндекс.Радио (Chromium extension)",
   "main": "not-a-package",
   "scripts": {
-    "build": "npm prune && npm update && webpack",
-    "build-fast": "webpack",
-    "lint": "eslint -c tools/.eslintrc.js --ignore-pattern src/bundle/** --ignore-pattern src/vendor/** src/**/*.js",
-    "increment-version-major": "node tools/increment_version.js --version=major",
-    "increment-version-minor": "node tools/increment_version.js --version=minor",
-    "increment-version-patch": "node tools/increment_version.js --version=patch",
-    "make-dist": "webpack && node tools/make_dist.js",
+    "build": "npm prune && npm update && npm run build:all",
+    "build:all": "npm run build:chromium && npm run build:firefox && npm run build:opera",
+    "build:chromium": "webpack && node tools/post_build.js",
+    "build:firefox": "webpack --firefox",
+    "build:opera": "webpack --opera && node tools/post_build.js --opera",
+    "lint": "eslint -c tools/.eslintrc.js --ignore-pattern src/vendor/** src/**/*.js",
+    "increment-version:major": "node tools/increment_version.js --version=major",
+    "increment-version:minor": "node tools/increment_version.js --version=minor",
+    "increment-version:patch": "node tools/increment_version.js --version=patch",
     "create-github-release": "node tools/create_github_release.js",
     "show-download-stats": "node tools/show_download_stats.js",
     "cover-sizes": "node tools/cover_sizes.js"
@@ -31,22 +33,14 @@
     "babel-loader": "6.2.4",
     "babel-plugin-syntax-async-functions": "6.8.0",
     "babel-plugin-transform-async-to-generator": "6.8.0",
-    "babel-plugin-transform-es2015-parameters": "6.8.0",
     "babel-plugin-transform-strict-mode": "6.8.0",
     "blueimp-md5": "2.3.0",
-    "browser-id3-writer": "2.3.0",
+    "browser-id3-writer": "2.3.1",
+    "copy-webpack-plugin": "2.1.3",
     "eslint": "2.9.0",
     "eslint-plugin-babel": "3.2.0",
     "jszip": "3.0.0",
     "uritemplate": "0.3.4",
     "webpack": "1.13.0"
-  },
-  "babel": {
-    "plugins": [
-      "syntax-async-functions",
-      "transform-async-to-generator",
-      "transform-es2015-parameters",
-      "transform-strict-mode"
-    ]
   }
 }

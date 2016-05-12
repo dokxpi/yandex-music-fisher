@@ -3,7 +3,6 @@ const checkboxes = [
     'shouldDownloadCover',
     'enumerateAlbums',
     'enumeratePlaylists',
-    'shouldNotifyAboutUpdates',
     'singleClickDownload',
     'backgroundDownload',
     'shouldUseFolder'
@@ -17,14 +16,7 @@ const texts = [
     'folder'
 ];
 
-let backgroundPage;
-
-function saveSetting(setting, value) {
-    const options = {};
-
-    options[setting] = value;
-    chrome.storage.local.set(options, backgroundPage.fisher.storage.load);
-}
+let background;
 
 function afterCheckboxChanged(checkbox) { // изменение UI
     const checked = $(checkbox).checked;
@@ -42,15 +34,15 @@ function afterCheckboxChanged(checkbox) { // изменение UI
             $('folder').setAttribute('disabled', 'disabled');
         }
     } else if (checkbox === 'backgroundDownload') {
+        if (!PLATFORM_CHROMIUM) {
+            $('backgroundDownload').parentNode.parentNode.parentNode.style.display = 'none';
+            return;
+        }
+
         const permissions = {
             permissions: ['background']
         };
-
         chrome.permissions.contains(permissions, (contains) => {
-            if ('lastError' in chrome.runtime) { // opera
-                backgroundPage.console.info(chrome.runtime.lastError.message);
-                $('backgroundDownload').parentNode.parentNode.parentNode.style.display = 'none';
-            }
             if (contains && !checked) { // btnReset
                 chrome.permissions.remove(permissions);
             }
@@ -62,24 +54,27 @@ checkboxes.forEach((checkbox) => {
     $(checkbox).addEventListener('click', () => {
         const checked = $(checkbox).checked;
 
-        saveSetting(checkbox, checked);
+        background.fisher.storage.setItem(checkbox, checked);
         afterCheckboxChanged(checkbox);
 
         if (checkbox === 'backgroundDownload') {
+            if (!PLATFORM_CHROMIUM) {
+                return;
+            }
+
             const permissions = {
                 permissions: ['background']
             };
-
             if (checked) {
                 chrome.permissions.request(permissions, (granted) => {
                     if (!granted) {
-                        saveSetting(checkbox, false);
+                        background.fisher.storage.setItem(checkbox, false);
                     }
                 });
             } else {
                 chrome.permissions.remove(permissions, (removed) => {
                     if (!removed) {
-                        saveSetting(checkbox, false);
+                        background.fisher.storage.setItem(checkbox, false);
                     }
                 });
             }
@@ -94,7 +89,7 @@ selects.forEach((select) => {
         if (select === 'downloadThreadCount') {
             value = parseInt(value, 10);
         }
-        saveSetting(select, value);
+        background.fisher.storage.setItem(select, value);
     });
 });
 
@@ -103,19 +98,18 @@ texts.forEach((text) => {
         let value = $(text).value;
 
         if (text === 'folder') {
-            value = backgroundPage.fisher.utils.clearPath(value, true);
+            value = background.fisher.utils.clearPath(value, true);
             if (value === '') {
                 return; // не сохраняем
             }
         }
-        saveSetting(text, value);
+        background.fisher.storage.setItem(text, value);
     });
 });
 
-$('btnReset').addEventListener('click', async() => {
-    await backgroundPage.fisher.storage.resetAll();
-    backgroundPage.fisher.storage.load();
-    location.reload();
+$('btnReset').addEventListener('click', () => {
+    background.fisher.storage.reset();
+    loadOptions();
 });
 
 function getBackgroundPage() {
@@ -125,19 +119,19 @@ function getBackgroundPage() {
 }
 
 async function loadOptions() {
-    backgroundPage = await getBackgroundPage();
+    background = await getBackgroundPage();
 
     checkboxes.forEach((checkbox) => {
-        $(checkbox).checked = backgroundPage.fisher.storage.current[checkbox];
+        $(checkbox).checked = background.fisher.storage.getItem(checkbox);
         afterCheckboxChanged(checkbox);
     });
 
     selects.forEach((select) => {
-        $(select).value = backgroundPage.fisher.storage.current[select];
+        $(select).value = background.fisher.storage.getItem(select);
     });
 
     texts.forEach((text) => {
-        $(text).value = backgroundPage.fisher.storage.current[text];
+        $(text).value = background.fisher.storage.getItem(text);
     });
 }
 
