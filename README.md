@@ -1,5 +1,7 @@
 # Yandex Music Fisher
 
+[![Travis](https://img.shields.io/travis/egoroof/yandex-music-fisher.svg?style=flat-square)](https://travis-ci.org/egoroof/yandex-music-fisher)
+
 Расширение браузера для скачивания музыки с сервисов [Яндекс.Музыка](https://music.yandex.ru/)
 и [Яндекс.Радио](https://radio.yandex.ru/).
 
@@ -8,36 +10,20 @@
 
 [Список изменений](https://github.com/egoroof/yandex-music-fisher/releases)
 
-### Что нужно
-
-Нужен браузер на движке Chromium: [Chrome](https://www.google.com/chrome) (рекомендуется),
-[Яндекс.Браузер](https://browser.yandex.ru), [Opera](https://www.opera.com) или подобный.
-
 ### Установка
 
-[Скачайте архив по этой ссылке](https://github.com/egoroof/yandex-music-fisher/releases/download/v1.10.0/yandex-music-fisher_1.10.0.zip),
-извлеките в текущую папку, откройте страницу расширений в браузере и перенесите туда мышкой извлечённую папку __yandex-music-fisher__.
-Затем в браузере появится новое расширение:
+Chrome, Яндекс.Браузер:
+[Интернет-магазин Chrome](https://chrome.google.com/webstore/detail/yandex-music-fisher/gkdpmbjlfgjbnleinnojgpgoljaokbni)
 
-![Установка](/readme_img/install.gif "Установка")
-
-Обновляется расширение так же. Когда появится обновление, расширение оповестит вас.
+Opera: [Дополнения к Opera](https://addons.opera.com/ru/extensions/details/yandex-music-fisher/)
 
 ### Как пользоваться
 
-Откройте страницу на [Яндекс.Музыка](https://music.yandex.ru/) с нужным ![blue](/readme_img/blue.png) треком,
-![yellow](/readme_img/yellow.png) альбомом или ![green](/readme_img/green.png) плейлистом - иконка изменит цвет в зависимости
+[Демонстрация](https://raw.githubusercontent.com/egoroof/yandex-music-fisher/master/readme_img/usage.gif)
+
+Откройте страницу на [Яндекс.Музыка](https://music.yandex.ru/) с нужным ![blue](readme_img/blue.png) треком,
+![yellow](readme_img/yellow.png) альбомом или ![green](readme_img/green.png) плейлистом - иконка изменит цвет в зависимости
 от открытой страницы. Нажав на неё откроется всплывающее окно с информацией о загрузке и кнопкой для начала скачивания.
-
-![Использование](/readme_img/usage.gif "Использование")
-
-После нажатия на кнопку скачивания начнётся загрузка. Прогресс виден на вкладке "Загрузки":
-
-![Загрузки](/readme_img/loader.png)
-
-На странице исполнителя отметьте нужные альбомы и качайте дискографию:
-
-![Дискография](/readme_img/discography.png)
 
 На [Яндекс.Радио](https://radio.yandex.ru/) выберите жанр для прослушивания и качайте играющие треки.
 
@@ -70,10 +56,14 @@
 - [GitHub](https://github.com/egoroof/yandex-music-fisher)
 - [Bitbucket](https://bitbucket.org/egoroof/yandex-music-fisher)
 
-### Сборка расширения (для разработчиков)
+### Сборка расширения
 
-1. Устанавливаем [Node.js](https://nodejs.org/en/) 6+.
-2. Обновляем зависимости и собираем расширение: `npm run build`
+Для сборки нужен [Node.js](https://nodejs.org/en/) 6+.
+
+```
+npm install
+npm run build
+```
 
 Загружать браузером распакованное расширение после сборки из папки `dist`.
 

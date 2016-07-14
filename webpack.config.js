@@ -28,7 +28,6 @@ module.exports = {
             loader: 'babel-loader',
             query: {
                 plugins: [
-                    'syntax-async-functions',
                     'transform-async-to-generator',
                     'transform-strict-mode'
                 ]

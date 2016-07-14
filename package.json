@@ -1,46 +1,32 @@
 {
   "name": "yandex-music-fisher",
-  "version": "0.0.0-not-a-package",
-  "description": "Downloader for Яндекс.Музыка & Яндекс.Радио (Chromium extension)",
-  "main": "not-a-package",
+  "version": "2.0.3",
+  "private": true,
   "scripts": {
-    "build": "npm prune && npm update && npm run build:all",
-    "build:all": "npm run build:chromium && npm run build:firefox && npm run build:opera",
+    "build": "npm run build:chromium && npm run build:firefox && npm run build:opera",
     "build:chromium": "webpack && node tools/post_build.js",
-    "build:firefox": "webpack --firefox",
+    "build:firefox": "webpack --firefox && node tools/post_build.js --firefox",
     "build:opera": "webpack --opera && node tools/post_build.js --opera",
-    "lint": "eslint -c tools/.eslintrc.js --ignore-pattern src/vendor/** src/**/*.js",
-    "increment-version:major": "node tools/increment_version.js --version=major",
-    "increment-version:minor": "node tools/increment_version.js --version=minor",
-    "increment-version:patch": "node tools/increment_version.js --version=patch",
+    "lint": "eslint -c tools/.eslintrc.js --ignore-pattern src/vendor/**/*.js src/**/*.js",
+    "preversion": "npm run lint",
+    "version": "npm run build && npm run create-github-release && git add package.json",
+    "postversion": "git push && git push --tags",
     "create-github-release": "node tools/create_github_release.js",
     "show-download-stats": "node tools/show_download_stats.js",
     "cover-sizes": "node tools/cover_sizes.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/egoroof/yandex-music-fisher.git"
-  },
-  "author": "egoroof",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/egoroof/yandex-music-fisher/issues"
-  },
-  "homepage": "https://github.com/egoroof/yandex-music-fisher#readme",
   "devDependencies": {
-    "babel-core": "6.8.0",
+    "babel-core": "6.9.1",
     "babel-eslint": "6.0.4",
     "babel-loader": "6.2.4",
-    "babel-plugin-syntax-async-functions": "6.8.0",
     "babel-plugin-transform-async-to-generator": "6.8.0",
     "babel-plugin-transform-strict-mode": "6.8.0",
     "blueimp-md5": "2.3.0",
     "browser-id3-writer": "2.3.1",
-    "copy-webpack-plugin": "2.1.3",
-    "eslint": "2.9.0",
-    "eslint-plugin-babel": "3.2.0",
+    "copy-webpack-plugin": "3.0.1",
+    "eslint": "2.12.0",
     "jszip": "3.0.0",
     "uritemplate": "0.3.4",
-    "webpack": "1.13.0"
+    "webpack": "1.13.1"
   }
 }

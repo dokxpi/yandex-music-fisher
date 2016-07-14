@@ -3,6 +3,16 @@ const $ = document.getElementById.bind(document);
 let background;
 let updateIntervalId;
 
+window.addEventListener('error', (e) => {
+    background.console.warn(e.error.stack);
+    e.returnValue = false;
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+    background.console.warn(e.reason);
+    e.returnValue = false;
+});
+
 function generateListView(entity) {
     const totalTrackCount = entity.tracks.length;
     const totalStatus = {
@@ -219,18 +229,15 @@ $('downloadContainer').addEventListener('mousedown', (e) => {
         background.fisher.downloader.runAllThreads();
     } else if (isRestoreBtnClick) {
         if (isCover && entity.cover.status === background.fisher.downloader.STATUS.INTERRUPTED) {
-            entity.cover.attemptCount = 0;
             entity.cover.status = background.fisher.downloader.STATUS.WAITING;
             background.fisher.downloader.download();
         }
         if (isTrack) {
-            entity.attemptCount = 0;
             entity.status = background.fisher.downloader.STATUS.WAITING;
             background.fisher.downloader.download();
         } else if (isAlbum || isPlaylist) {
             entity.tracks.forEach((track) => {
                 if (track.status === background.fisher.downloader.STATUS.INTERRUPTED) {
-                    track.attemptCount = 0;
                     track.status = background.fisher.downloader.STATUS.WAITING;
                     background.fisher.downloader.download();
                 }
@@ -244,31 +251,27 @@ $('startDownloadBtn').addEventListener('click', () => {
 
     $('downloadBtn').click();
     switch (downloadType) {
-        case 'track':
-        {
+        case 'track': {
             const trackId = $('startDownloadBtn').getAttribute('data-trackId');
             const albumId = $('startDownloadBtn').getAttribute('data-albumId');
 
             background.fisher.downloader.downloadTrack(trackId, albumId);
             break;
         }
-        case 'album':
-        {
+        case 'album': {
             const albumId = $('startDownloadBtn').getAttribute('data-albumId');
 
             background.fisher.downloader.downloadAlbum(albumId, null);
             break;
         }
-        case 'playlist':
-        {
+        case 'playlist': {
             const username = $('startDownloadBtn').getAttribute('data-username');
             const playlistId = $('startDownloadBtn').getAttribute('data-playlistId');
 
             background.fisher.downloader.downloadPlaylist(username, playlistId);
             break;
         }
-        case 'artistOrLabel':
-        {
+        case 'artistOrLabel': {
             const name = $('startDownloadBtn').getAttribute('data-name');
             const albumElems = document.getElementsByClassName('album');
             const compilationElems = document.getElementsByClassName('compilation');

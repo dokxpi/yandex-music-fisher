@@ -23,7 +23,7 @@ function httpsGet(url) {
             res.on('end', () => resolve(JSON.parse(data)));
         });
 
-        request.on('error', (e) => reject(new Error(e)));
+        request.on('error', reject);
         request.end();
     });
 }
@@ -34,10 +34,15 @@ httpsGet('https://api.github.com/repos/egoroof/yandex-music-fisher/releases')
 
         console.log('GitHub download statistics');
         response.forEach((release) => {
-            const count = release.assets[0].download_count;
+            console.log(`--- ${release.name} ---`);
+            let count = 0;
+            release.assets.forEach((asset) => {
+                count += asset.download_count;
+                console.log(`${asset.name}: ${asset.download_count}`);
+            });
 
             totalCount += count;
-            console.log(`${release.name}: ${count}`);
+            console.log('');
         });
         console.log(`Total: ${totalCount}`);
     })

@@ -3,6 +3,7 @@ const os = require('os');
 const path = require('path');
 const JSZip = require('jszip');
 const manifest = require('../src/manifest.json');
+const pack = require('../package.json');
 
 const isOpera = process.argv[2] === '--opera';
 const isFirefox = process.argv[2] === '--firefox';
@@ -31,23 +32,24 @@ function readDirSync(dir, filelist) {
 }
 
 function createManifest() {
+    manifest.version = pack.version;
     if (isFirefox) {
         manifest.applications = {
             gecko: {
                 id: 'yandex-music-fisher@egoroof.ru',
-                strict_min_version: '48.0a1'
+                strict_min_version: '49.0a1'
             }
         };
     }
     if (isChromium) {
-        manifest.optional_permissions = [
-            'background'
-        ];
-        manifest.minimum_chrome_version = '49.0';
+        manifest.optional_permissions = ['background'];
         manifest.permissions.push('downloads.shelf');
+        manifest.minimum_chrome_version = '49.0';
+        manifest.incognito = 'split';
     }
     if (isOpera) {
-        manifest.minimum_chrome_version = '49.0';
+        manifest.minimum_opera_version = '36.0';
+        manifest.incognito = 'split';
     }
 
     const newManifest = JSON.stringify(manifest, null, 2).replace(/[\n]/g, os.EOL) + os.EOL;
@@ -71,11 +73,14 @@ function createArchive() {
         }
     }).then((buffer) => {
         const ext = (isFirefox) ? 'xpi' : 'zip';
-        const archiveName = `yandex-music-fisher_${manifest.version}_${platform}.${ext}`;
+        const archiveName = `yandex-music-fisher_${pack.version}_${platform}.${ext}`;
 
-        fs.writeFileSync(archiveName, buffer);
+        fs.writeFileSync(path.join('dist', archiveName), buffer);
         console.log(`${archiveName} was created`);
-    }).catch((e) => console.error(e));
+    }).catch((e) => {
+        console.error(e);
+        process.exit(1);
+    });
 }
 
 createManifest();

@@ -2,8 +2,5 @@
 node_modules/
 dist/
 tools/todo.md
-tools/release_checklist.md
 tools/tokens.json
 npm-debug.log
-yandex-music-fisher_*.zip
-yandex-music-fisher_*.xpi

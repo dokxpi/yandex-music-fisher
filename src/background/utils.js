@@ -2,14 +2,12 @@
 
 function fetchBuffer(url, onProgress) {
     return new Promise((resolve, reject) => {
-        const HTTP_STATUS_SUCCESS = 200;
-        const HTTP_STATUS_REDIRECTION = 300;
         const xhr = new XMLHttpRequest();
 
         xhr.open('GET', url, true);
         xhr.responseType = 'arraybuffer';
         xhr.onload = () => {
-            if (xhr.status >= HTTP_STATUS_SUCCESS && xhr.status < HTTP_STATUS_REDIRECTION) {
+            if (xhr.status >= 200 && xhr.status < 300) {
                 if (xhr.response) {
                     resolve(xhr.response);
                 } else {
@@ -25,10 +23,6 @@ function fetchBuffer(url, onProgress) {
         }
         xhr.send();
     });
-}
-
-function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function bytesToStr(bytes) {
@@ -193,41 +187,16 @@ function getActiveTab() {
     });
 }
 
-function getDownload(downloadId) {
-    return new Promise((resolve) => {
-        chrome.downloads.search({
-            id: downloadId
-        }, (downloads) => {
-            if (downloads.length && downloads[0].byExtensionName === chrome.runtime.getManifest().name) {
-                resolve(downloads[0]);
-            }
-        });
-    });
-}
-
 function updateBadge() {
     const count = window.fisher.downloader.getDownloadCount();
 
-    let countStr = '';
-
-    if (count) {
-        countStr = count.toString();
-    }
     chrome.browserAction.setBadgeText({
-        text: countStr
+        text: (count) ? count.toString() : ''
     });
-}
-
-function parseJsonResponse(response) {
-    if (!response.ok) {
-        throw new Error(`${response.status} (${response.statusText})`);
-    }
-    return response.json();
 }
 
 module.exports = {
     fetchBuffer,
-    delay,
     bytesToStr,
     addExtraZeros,
     durationToStr,
@@ -236,7 +205,5 @@ module.exports = {
     getUrlInfo,
     updateTabIcon,
     getActiveTab,
-    getDownload,
-    updateBadge,
-    parseJsonResponse
+    updateBadge
 };

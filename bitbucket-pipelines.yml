@@ -1,0 +1,9 @@
+image: node
+
+pipelines:
+  default:
+    - step:
+        script:
+          - npm install
+          - npm run lint
+          - npm run build

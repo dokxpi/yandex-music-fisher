@@ -47,17 +47,10 @@ downloader.download = async() => {
     let coverBuffer;
     let trackAlbum;
 
-    async function onInterruptEntity(error) {
-        entity.attemptCount++;
+    function onInterruptEntity(error) {
         entity.loadedBytes = 0;
-        if (entity.attemptCount < 3) {
-            await fisher.utils.delay(10000);
-            entity.status = downloader.STATUS.WAITING;
-            downloader.download();
-        } else {
-            entity.status = downloader.STATUS.INTERRUPTED;
-            console.error(error, entity);
-        }
+        entity.status = downloader.STATUS.INTERRUPTED;
+        console.error(error, entity);
         downloader.activeThreadCount--;
         downloader.download();
     }
@@ -67,7 +60,7 @@ downloader.download = async() => {
     }
 
     function onChromeDownloadStart(downloadId) {
-        if ('lastError' in chrome.runtime) {
+        if (chrome.runtime.lastError) {
             onInterruptEntity(chrome.runtime.lastError.message);
         } else {
             if (PLATFORM_CHROMIUM) {
@@ -138,11 +131,11 @@ downloader.download = async() => {
             savePath = `${fisher.storage.getItem('folder')}/${savePath}`;
         }
 
+        entity.browserDownloadUrl = writer.getURL();
         chrome.downloads.download({
-            url: writer.getURL(),
+            url: entity.browserDownloadUrl,
             filename: savePath,
-            conflictAction: 'overwrite',
-            saveAs: false
+            conflictAction: 'overwrite'
         }, onChromeDownloadStart);
     }
 
@@ -167,7 +160,7 @@ downloader.download = async() => {
             const trackUrl = await fisher.yandex.getTrackUrl(entity.track.id);
             const buffer = await fisher.utils.fetchBuffer(trackUrl, onProgress);
 
-            await saveTrack(buffer);
+            saveTrack(buffer);
         } catch (e) {
             onInterruptEntity(e.message);
         }
@@ -187,7 +180,7 @@ downloader.download = async() => {
         }
 
         const blob = new Blob([buffer], {type: 'image/jpeg'});
-        const localUrl = window.URL.createObjectURL(blob);
+        entity.browserDownloadUrl = window.URL.createObjectURL(blob);
 
         let savePath = entity.savePath;
         if (fisher.storage.getItem('shouldUseFolder')) {
@@ -195,10 +188,9 @@ downloader.download = async() => {
         }
 
         chrome.downloads.download({
-            url: localUrl,
+            url: entity.browserDownloadUrl,
             filename: savePath,
-            conflictAction: 'overwrite',
-            saveAs: false
+            conflictAction: 'overwrite'
         }, onChromeDownloadStart);
     }
 };
@@ -222,8 +214,8 @@ downloader.downloadTrack = (trackId, albumId, folder) => {
             savePath: '',
             lyrics: null,
             loadedBytes: 0,
-            attemptCount: 0,
-            browserDownloadId: null
+            browserDownloadId: null,
+            browserDownloadUrl: null
         };
 
         if ('version' in track) {
@@ -287,7 +279,8 @@ downloader.downloadAlbum = (albumId, folder) => {
                 url: `https://${album.coverUri.replace('%%', fisher.storage.getItem('albumCoverSize'))}`,
                 savePath: `${saveDir}/cover.jpg`,
                 loadedBytes: 0,
-                attemptCount: 0
+                browserDownloadId: null,
+                browserDownloadUrl: null
             };
         }
 
@@ -310,12 +303,12 @@ downloader.downloadAlbum = (albumId, folder) => {
                     title: track.title,
                     savePath: null,
                     loadedBytes: 0,
-                    attemptCount: 0,
                     trackPosition,
                     trackCountInAlbum: volume.length,
                     albumPosition,
                     albumCount: album.volumes.length,
-                    browserDownloadId: null
+                    browserDownloadId: null,
+                    browserDownloadUrl: null
                 };
 
                 if ('version' in track) {
@@ -385,8 +378,8 @@ downloader.downloadPlaylist = (username, playlistId) => {
                 title: track.title,
                 savePath: null,
                 loadedBytes: 0,
-                attemptCount: 0,
-                browserDownloadId: null
+                browserDownloadId: null,
+                browserDownloadUrl: null
             };
 
             if ('version' in track) {

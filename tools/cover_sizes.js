@@ -21,7 +21,7 @@ function httpsHead(url) {
                 reject(new Error('HTTP bad status'));
             }
         });
-        request.on('error', (e) => reject(new Error(e)));
+        request.on('error', reject);
         request.end();
     });
 }
